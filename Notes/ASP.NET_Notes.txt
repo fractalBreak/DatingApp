@@ -1,0 +1,133 @@
+UDEMY ASP.NET PROJECT FROM SCRATCH NOTES
+
+/*** ASP.NET CLI COMMANDS: ***/
+
+dotnet -h				:	help
+dotnet new -h				:	lists all of all dotnet project templates
+dotnet new {"template_type"}		:	builds new dotnet project from designated {"template_type"}
+dotnet new webapi			:	builds a new ASP.NET Core Web API
+dotnet new {"template_type"} -h		: 	lists switches that can be used on specified {"template_type"} 
+dotnet new webapi -n {"name"}		:	builds new dotnet webapi project and names it according to {"name"} ; -n is "name" flag
+code {path}				:	opens file at path in VS Code ; ex. if inside project folder -> "code ." opens project in VS Code
+dotnet run				:	runs project
+dotnet watch run			:	runs project and watches for file changes ; upon a file change the app is restarted
+dotnet tool install --global dotnet-ef	:	gives us access to dotnet entityFramework tools 
+dotnet ef -h				:	lists all ef commands
+dotnet ef migrations -h			:	lists all migrations commands
+dotnet ef migrations add {"name"}	:	adds a migration
+dotnet ef database update		:	applies a migration and either updates an existing database or creates one if one doesn't already exist
+dotnet -ef dbcontext scaffold 
+	"ConnectionStringPlaceholder"	:	generates models from a prebuilt database ; only the connection string is required
+
+
+/*** GENERAL TOPICS: ***/
+
+// NEEDED VS Code EXTENSIONS		: 	Cntrl+Shift+P to open Extension Browser
+C# for VisualStudio Code
+C# Extensions
+NuGet Package Manager
+
+// BUILDING THE DATABASE
+Define Database Entities
+	- Create Models Folder
+	- Create a class that will hold Database Entity and its property values
+Need to tell Entity Framework about our Entity so that it can "scaffold" the database and make a table for this class
+	- Create a Data Folder ; Inside this folder create a DataContext class which is derived from 'DbContext' Entity Framework class :
+		-- public class DataContext : DbContext {...}
+	- **Need to include EntityFramework in our ItemGroup within our {"ProjectName"}.csproj file and use it as a reference in our DataContext file
+		-- use NuGet package manager to add the Microsoft.EntityFrameworkCore to your project if you haven't already
+	- Generate DataContext Constructor
+		-- public DataContext(DbContextOptions<DataContext> options) : base(options){}
+	- Now we can tell our DataContext Class about our Entities
+		-- Create a property :
+			--- public DbSet<{"EntityClassType"}> {"ArbitraryEntityCollectionName"} { get; set; }
+Need to let our application know about our DataContext Class by making it available as a service so that it can be consumed in other parts of our application
+	- Navigate to Startup.cs and add DbContext as a service inside the ConfigureServices() method
+		-- services.AddDbContext<DataContext>()
+	- provide the above method options by defining a regex as input and specify connection string ; in this instance we are using Sqlite
+		-- services.AddDbContext<DataContext>(x => x.UseSqlite("ConnectionString"));   "ConnectionString" is a placeholder and is dependent on what kind of DB one is using
+		-- will need to add Microsoft.EntityFrameworkCore.Sqlite to project using NuGet for UseSqlite method to work
+		-- Microsoft.EntityFrameworkCore.SqlServer needs to be added for SqlServer compatibility
+Create the Database Connection String in our configuration files
+	- Navigate to appsetting.json and add a new object named "ConnectionStrings" and populate it with a "DefaultConnection"
+		-- 	"ConnectionStrings": {
+				"DefaultConnection": "Data Source-datingapp.db" // this is a Sqlite-specific connection string
+			},
+			--- NOTE: "DefaultConnection" is named this by convention but is optional
+		-- in this particular instance it was placed above the "Logging" configuration object
+Reference our new ConnectionString 
+	-Navigate to Startup.cs 
+	- modify: services.AddDbContext<>() method
+		-- ORIGINAL	:	services.AddDbContext<DataContext>(x => x.UseSqlite("ConnectionString"));
+		-- RESULT	: 	services.AddDbContext<DataContext>(x => x.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
+			--- "DefaultConnection" is the Connection key that is used to map proper string from configuration file
+Create a Migration
+	- A migration is something EntityFramework uses to create the code that "scaffolds" our database that we can then connect to and query
+	- Need access to dotnet entity framework tool
+		-- enter the following into terminal	:	dotnet tool install --global dotnet-ef
+	- Then add a new migration
+		-- enter	:	dotnet ef migrations add InitialCreate
+			--- will likely get error that states the startup project doesn't reference Microsoft.EntityFrameworkCore.Design
+			--- add it using NuGet and re-enter command
+		-- this will add a Migrations Folder and a few .cs files as children ; info about these files in PROJECT ANATOMY section
+Apply the Migration and Create the Database
+	- enter command into CLI	:	dotnet ef database update
+	- a .db file should have been added to the project folder
+
+
+
+/*** PROJECT ANATOMY ***/
+
+// Program.cs
+Every ASP.NET has a Program.cs file with a "Program" class
+The Program class must have a Main method
+	- The main method has "one job" which is to call CreateHostBuilder method
+CreateHostBuilder configures defaults upon application startup
+	- Uses Kestrel Web Server (inside .NET Core) to host our API
+	- passed webBuilder lambda expression allows access to additional configuration through "Startup" class found in Startup.cs
+		-- webBuilder => { webBuilder.UserStartup<Startup>(); }
+// Startup.cs
+Configuration is being injected into Startup class 
+	- CONSTRUCTOR : public Startup(IConfiguration configuration) { // injected as parameter within Startup Constructor Method
+				Startup.Configuration = configuration; }
+		-- The Startup.Configuration data field allows access to our configuration files : appsettings.json and appsetting.Developement.json
+			--- appsettings.json is used in both development and production mode while the other is limited to Developement mode
+public void ConfigureServices(IServiceCollection services){...} 
+	- "Dependency Injection Container" : 	Whenever we create something that we want to be consumed by another part of our application then we add it as a service,
+						allowing us to inject it as a Service somewhere else
+public void Configure(IApplicationBuilder app, IWebHostEnvironment env){...}
+	- Use this method to configure HTTP request pipeline
+		-- Whenever the API recieves a request, it goes through the request pipeline. 
+		-- Everything help within this method is "middle-ware" which is software that interacts with the request as it goes through the pipeline
+	- INTERIOR METHODS:
+		-- app.
+
+// {"Project_Name"}.csproj
+File tells our application which Framework it is targeting
+Also tells our application which external packages to include
+
+// launchSettings.json
+File is read from when we use .NET CLI to run application i.e. "dotnet run"
+	- we can launch in "Development" or "Production" modes by manipulating the appropriate "ASPNETCORE_ENVIRONMENT" string for example
+
+// Data Folder and DataContext.cs
+
+
+// Models Folder and Entities contained therin
+
+
+// Migrations Folder
+	// InitialCreate.Designer.cs
+	// DataContextModelSnapshot.cs
+		- both help EntityFramework keep track of what migrations have been applied as well as what to do in the event that we remove/update a migration
+	// InitialCreate.cs
+		- 
+
+/*** BUZZWORDS ***/
+
+Extension Methods
+Attribute Based Routing
+Concurrency vs Parallelism
+Async vs Threads
+
+		

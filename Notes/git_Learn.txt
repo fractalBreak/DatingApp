@@ -1,0 +1,27 @@
+/*** GIT NOTES ***/
+
+git config --help
+git config --global user.name "Michael Beaver"
+git config --list 
+git add <fileName>					: add a file to staging area
+git add -A						: add every file into the staging area as "tracked" files
+git reset						: removes all files from staging area
+git status						: shows the working directory and staging area
+git log							: displays change-log
+git clone <url> <where to clone>			: clones a remote repository to the specified location
+git remote -v						: lists the location of our repository
+git remote add origin <URL address of repo>		: provides the origin of a remote repo
+git branch <nameOfBranch>				: creates a named branch
+git branch --merged					: lists all merged branches
+git branch -a						: lists all branches in repository; Local and Remote
+git branch -d <nameOfBranch> 				: delete local named branch
+git diff						: lists all changes made since last commit
+git commit -m <"Message">				: commit changes and attach message
+git pull <repository> <branchName>			: pulls all changes made to a remote reposity since last pull
+git push -u <repository/originURLaddress> <branchName>	: push commits to the master branch of the origin remote repository
+git checkout <branchName>				: checksout a branch for you to work on
+git merge <branchName>					: merges named branch with the branch you currently have checked out
+
+
+
+

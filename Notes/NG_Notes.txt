@@ -1,0 +1,45 @@
+/*** NG NOTES ***/
+
+
+/* NG CLI COMMANDS */
+
+npm install -g @angular/cli					: installs the Angular CLI globally which gives us access to 'ng' command; 'npm' required nodejs be installed on your machine
+ng new <app-name>						: initialized a new named Angular project
+ng generate component <name>					: generates a new named component
+ng serve							: launches app
+
+
+
+/* GENERAL TOPICS */
+
+NG Application Bootstraps itself.
+
+Application components must all be decorated with "@Component" decorator
+	- Decorating gives our components "Angular features" and configuration properties i.e. "selector, templateURL, styleURL
+
+
+
+
+
+
+/* PROJECT ANATOMY */
+
+// package.json
+- Contains a comprehensive list of project dependencies; it is used to construct the node_modules directory which is where all depency source code is contained
+
+// src folder
+- Contains all Angular code
+
+// app folder
+- app.module.ts		
+	-- *IMPORTANT* app must have at least one file decorated with "@NgModule" decorator
+- app.component.ts	:
+	-- root component that is bootstrapped by our app.module.ts file
+	-- Our app component is an Angular class that is reponsible for the data for our 'view' provided by the html file under the 'templateUrl' property found in the "@Component" class decorator
+		-- the data is pulled from our component.ts file and inserted into our template html files through "interpolation"; SYNTAX : {{ propertyIdentifier }}
+
+// main.ts
+- 
+
+// angular.json
+- the angular configuration file
